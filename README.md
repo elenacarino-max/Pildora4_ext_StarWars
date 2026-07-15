@@ -3,6 +3,16 @@
 Material docente para explicar MLflow con el dataset Digits y una narrativa
 inspirada en Star Wars.
 
+## Nueva aplicación interactiva
+
+La nueva versión completa está en `app-v2/`. Es una aplicación Streamlit con
+sesiones, seis cámaras, validación segura de código, entrenamiento real,
+tracking con MLflow, comparador de runs, holocrones, defensas y panel docente.
+
+Los documentos y notebooks descritos a continuación se conservan como plan de
+contingencia, práctica posterior y material de referencia. El despliegue de la
+nueva aplicación se decidirá después de validar su funcionamiento local.
+
 ## Versiones vigentes
 
 ### Documentos para el alumnado
