@@ -12,8 +12,6 @@ inspirada en Star Wars.
 
 ### Documentos para el profesorado
 
-- `docs/profesorado/Guion_EXPOSICION_DIGITS.docx`: libreto completo de la
-  exposición y del live coding.
 - `docs/profesorado/Guion_PROFESORAS_DIGITS.docx`: guía resumida para preparar
   e impartir la sesión.
 - `docs/profesorado/Misiones_PROFESORADO_DIGITS.docx`: guía de corrección de
