@@ -1,0 +1,14 @@
+services:
+  mlflow-jedi:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      MLFLOW_JEDI_TEACHER_PASSWORD: ${MLFLOW_JEDI_TEACHER_PASSWORD:-cambia-esta-clave}
+      MLFLOW_JEDI_MAX_TEAMS: ${MLFLOW_JEDI_MAX_TEAMS:-7}
+    volumes:
+      - mlflow_jedi_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  mlflow_jedi_data:
