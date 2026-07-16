@@ -10,7 +10,7 @@ ARTIFACTS_DIR = DATA_DIR / "artifacts"
 GAME_DB = DATA_DIR / "game.db"
 MLFLOW_DB = DATA_DIR / "mlflow.db"
 
-TEACHER_PASSWORD = os.getenv("MLFLOW_JEDI_TEACHER_PASSWORD", "cambia-esta-clave")
+TEACHER_PASSWORD = os.getenv("MLFLOW_JEDI_TEACHER_PASSWORD", "1234")
 SESSION_PREFIX = "JEDI"
 MAX_TEAMS = int(os.getenv("MLFLOW_JEDI_MAX_TEAMS", "7"))
 

@@ -25,6 +25,8 @@ Nueva aplicación práctica de la píldora extendida. Los documentos y notebooks
 
 ```bash
 docker compose up --build
+
+docker compose down #para detenerla
 ```
 
 El volumen `mlflow_jedi_data` conserva sesiones, runs, modelos y artefactos aunque el contenedor se reinicie.
