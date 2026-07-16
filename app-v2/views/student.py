@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -11,6 +12,7 @@ except ImportError:  # Permite mostrar una ayuda clara si aún no se actualizó 
     st_ace = None
 
 from components.theme import card, map_node, seals
+from core.config import ARTIFACTS_DIR
 from core.code_validator import validate_mission_submission, validate_question_answer
 from core.database import (
     complete_chamber,
@@ -248,6 +250,127 @@ def _mission_editor(team: dict, session: dict) -> None:
         st.rerun()
 
 
+def _resolve_artifact_path(raw_path: str | None) -> Path | None:
+    if not raw_path:
+        return None
+    candidate = Path(raw_path)
+    if candidate.exists():
+        return candidate
+    normalized = raw_path.replace("\\", "/")
+    marker = "/artifacts/"
+    if marker in normalized:
+        relative = normalized.split(marker, 1)[1]
+        migrated = ARTIFACTS_DIR / Path(relative)
+        if migrated.exists():
+            return migrated
+    return None
+
+
+def _artifact_viewer(team: dict, key_prefix: str) -> None:
+    runs = get_mission_runs(team["id"])
+    if not runs:
+        st.info("Todavía no hay artefactos: completa al menos una misión.")
+        return
+    run_labels = {
+        next(item["title"] for item in MISSIONS if item["id"] == run["mission_id"]): run
+        for run in runs
+    }
+    selected_title = st.selectbox(
+        "Run cuyos artefactos queréis consultar",
+        list(run_labels),
+        key=f"{key_prefix}-artifact-run",
+    )
+    run = run_labels[selected_title]
+    matrix_path = _resolve_artifact_path(run["metrics"].get("matrix_path"))
+    report_path = _resolve_artifact_path(run["metrics"].get("report_path"))
+    matrix_tab, report_tab = st.tabs(["Matriz de confusión", "Informe por dígito"])
+    with matrix_tab:
+        st.caption("Las filas son los dígitos reales y las columnas las predicciones. Los valores fuera de la diagonal son errores.")
+        if matrix_path:
+            st.image(str(matrix_path), caption=f"Matriz de confusión · {selected_title}", width="stretch")
+            st.download_button(
+                "Descargar matriz PNG",
+                matrix_path.read_bytes(),
+                file_name=f"{selected_title.lower()}-matriz_confusion.png",
+                mime="image/png",
+                key=f"{key_prefix}-download-matrix",
+            )
+        else:
+            st.warning("No se encuentra la matriz de esta run. Volved a ejecutar la misión si los datos se trasladaron desde otro equipo.")
+    with report_tab:
+        st.caption("El recall indica qué proporción de cada dígito real fue reconocida correctamente.")
+        if report_path:
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            rows = [
+                {
+                    "Dígito": digit,
+                    "Precision": report[digit]["precision"],
+                    "Recall": report[digit]["recall"],
+                    "F1": report[digit]["f1-score"],
+                    "Ejemplos": int(report[digit]["support"]),
+                }
+                for digit in map(str, range(10))
+                if digit in report
+            ]
+            st.dataframe(
+                pd.DataFrame(rows).style.format({"Precision": "{:.3f}", "Recall": "{:.3f}", "F1": "{:.3f}"}),
+                use_container_width=True,
+                hide_index=True,
+            )
+            st.download_button(
+                "Descargar informe JSON",
+                report_path.read_bytes(),
+                file_name=f"{selected_title.lower()}-classification_report.json",
+                mime="application/json",
+                key=f"{key_prefix}-download-report",
+            )
+        else:
+            st.warning("No se encuentra el informe JSON de esta run.")
+
+
+def _order_66_card(team: dict) -> None:
+    holocron = holocron_by_id(team.get("holocron_id"))
+    if not holocron:
+        st.warning("El Consejo todavía no ha asignado un holocrón a este equipo.")
+        return
+    reveal_key = f"order-66-{team['id']}"
+    if st.button("Ejecuten Orden 66", type="primary", use_container_width=True, key=f"{reveal_key}-button"):
+        st.session_state[reveal_key] = True
+    if not st.session_state.get(reveal_key):
+        st.caption("Al pulsarlo recibiréis el encargo secreto que debéis resolver con las evidencias de las tres runs.")
+        return
+    st.markdown(f"## Orden 66 · {holocron['title']}")
+    st.markdown(
+        f'<div class="holocron"><div class="holocron-symbol">{holocron["icon"]}</div>'
+        f'<h3>{team["name"]}</h3><p>{holocron["brief"]}</p></div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(f"### Qué tenéis que hacer\n{holocron['task']}")
+    for index, step in enumerate(holocron["steps"], 1):
+        st.markdown(f"**{index}.** {step}")
+    st.success(f"**Entrega final:** {holocron['deliverable']}")
+    card_text = "\n".join([
+        f"ORDEN 66 · {holocron['title']}",
+        f"Equipo: {team['name']}",
+        "",
+        holocron["brief"],
+        "",
+        "QUÉ TENÉIS QUE HACER",
+        holocron["task"],
+        *[f"{index}. {step}" for index, step in enumerate(holocron["steps"], 1)],
+        "",
+        f"ENTREGA FINAL: {holocron['deliverable']}",
+    ])
+    st.download_button(
+        "Descargar tarjeta Orden 66",
+        card_text.encode("utf-8"),
+        file_name=f"orden-66-{team['name'].lower().replace(' ', '-')}.txt",
+        mime="text/plain",
+        use_container_width=True,
+        key=f"{reveal_key}-download",
+    )
+
+
 def _comparator(team: dict) -> None:
     runs = get_mission_runs(team["id"])
     if len(runs) < 3:
@@ -260,12 +383,16 @@ def _comparator(team: dict) -> None:
         metrics = run["metrics"]
         rows.append({
             "Run": mission["title"], "Árboles": mission["n_estimators"],
-            "Profundidad": mission["max_depth"] or "Sin límite",
+            "Profundidad": str(mission["max_depth"]) if mission["max_depth"] is not None else "Sin límite",
             "Accuracy": metrics["accuracy"], "F1 weighted": metrics["f1_weighted"],
             "Recall dígito 1": metrics["recall_1"], "Recall dígito 8": metrics["recall_8"],
         })
     st.dataframe(pd.DataFrame(rows).style.format({"Accuracy":"{:.4f}","F1 weighted":"{:.4f}","Recall dígito 1":"{:.4f}","Recall dígito 8":"{:.4f}"}), use_container_width=True, hide_index=True)
     st.markdown('<div class="status-banner">La accuracy resume. El recall por clase y los artefactos explican dónde están los errores.</div>', unsafe_allow_html=True)
+    _order_66_card(team)
+    st.markdown("## Consultar las evidencias")
+    st.write("Antes de decidir, abrid los artefactos de cada run y buscad errores concretos que apoyen vuestra recomendación.")
+    _artifact_viewer(team, "comparator")
 
 
 def _defense(team: dict) -> None:
@@ -281,6 +408,9 @@ def _defense(team: dict) -> None:
             st.image(str(image))
         st.markdown(f'<div class="holocron"><div class="holocron-symbol">{holocron["icon"]}</div><h3>{holocron["title"]}</h3><p>{holocron["brief"]}</p></div>', unsafe_allow_html=True)
     with right:
+        st.markdown("### Evidencias disponibles")
+        st.write("Seleccionad una run y consultad aquí su matriz y su informe antes de completar la defensa.")
+        _artifact_viewer(team, "defense")
         existing = get_defense(team["id"])
         if existing:
             st.success("Defensa sellada. Utiliza esta tarjeta para la intervención de 45–60 segundos.")
@@ -289,7 +419,7 @@ def _defense(team: dict) -> None:
         with st.form("defense-form"):
             selected = st.selectbox("Run elegida", [item["title"] for item in MISSIONS])
             evidence = st.text_area("Evidencia principal")
-            artifact = st.selectbox("Artefacto consultado", ["matriz de confusión", "classification_report.json"])
+            artifact = st.selectbox("Artefacto consultado arriba", ["matriz de confusión", "classification_report.json"])
             discarded = st.selectbox("Run descartada", [item["title"] for item in MISSIONS], index=1)
             reason = st.text_area("Motivo del descarte")
             limitation = st.text_area("Riesgo o limitación")

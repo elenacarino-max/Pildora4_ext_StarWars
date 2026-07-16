@@ -13,6 +13,12 @@ class GameContentTests(unittest.TestCase):
     def test_all_missions_have_results(self):
         self.assertEqual({item["id"] for item in MISSIONS}, set(ORIENTATIVE_RESULTS))
 
+    def test_holocrons_include_actionable_order_66_card(self):
+        for holocron in HOLOCRONS:
+            self.assertTrue(holocron["task"])
+            self.assertEqual(len(holocron["steps"]), 4)
+            self.assertTrue(holocron["deliverable"])
+
 
 if __name__ == "__main__":
     unittest.main()
