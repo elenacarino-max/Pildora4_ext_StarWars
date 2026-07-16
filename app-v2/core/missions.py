@@ -98,6 +98,9 @@ MISSIONS = [
         "max_depth": 8,
         "accent": "#d9a441",
         "brief": "Completa una estructura preparada y recupera el primer expediente.",
+        "theory": "Una run reúne la configuración usada, los resultados obtenidos, los archivos de diagnóstico y el modelo. Aquí practicarás el patrón completo sin ejecutar tu texto: la app valida su estructura y después utiliza una plantilla interna segura.",
+        "context": """parametros = {\"dataset\": \"digits\", \"n_estimators\": 50, \"max_depth\": 8, \"test_size\": 0.2, \"random_state\": 42}\nmetricas = {\"accuracy\": accuracy, \"precision_weighted\": precision_weighted, \"recall_weighted\": recall_weighted, \"f1_weighted\": f1_weighted}\n# También existen modelo, matriz_confusion.png y classification_report.json""",
+        "starter": """# 🛰️ MISIÓN GUIADA: completa las cinco piezas dentro de la run\nwith mlflow.start_run(run_name=\"Mision_Tatooine\"):\n    # ⚙️ 1. Registra parametros\n    # 📡 2. Registra metricas\n    # 🔷 3. Registra los dos artefactos\n    # 🤖 4. Registra modelo\n    pass""",
     },
     {
         "id": "coruscant",
@@ -107,6 +110,9 @@ MISSIONS = [
         "max_depth": 10,
         "accent": "#43c8d8",
         "brief": "Corrige el intercambio entre parámetros, métricas y artefactos.",
+        "theory": "Los parámetros describen decisiones anteriores al entrenamiento; las métricas son resultados numéricos posteriores; los artefactos son archivos. Coruscant contiene llamadas válidas colocadas en la categoría equivocada.",
+        "context": """parametros = {\"dataset\": \"digits\", \"n_estimators\": 100, \"max_depth\": 10, \"test_size\": 0.2, \"random_state\": 42}\nmetricas = {\"accuracy\": accuracy, \"precision_weighted\": precision_weighted, \"recall_weighted\": recall_weighted, \"f1_weighted\": f1_weighted}\n# Repara el sabotaje y conserva dos artefactos y el modelo.""",
+        "starter": """# ⚔️ MISIÓN SABOTEADA: corrige las categorías y completa las evidencias\nwith mlflow.start_run(run_name=\"Mision_Coruscant\"):\n    mlflow.log_metrics(parametros)  # BUG: decisiones previas\n    mlflow.log_params(metricas)    # BUG: resultados\n    mlflow.log_artifact(\"matriz_confusion.png\")\n    # 🔷 Falta el segundo artefacto\n    # 🤖 Falta conservar el modelo""",
     },
     {
         "id": "mustafar",
@@ -116,6 +122,9 @@ MISSIONS = [
         "max_depth": None,
         "accent": "#df6548",
         "brief": "Escribe el tracking 5–4–2–1 con la mínima ayuda del Archivo.",
+        "theory": "En una run completa registrarás cinco parámetros, cuatro métricas, dos artefactos y un modelo. MLflow no entrena: documenta lo que scikit-learn ya ha producido para poder comparar y reutilizar.",
+        "context": """# Dispones de: parametros, metricas, modelo, matriz_confusion.png y classification_report.json.\n# La run debe llamarse Mision_Mustafar y contener todas las llamadas.""",
+        "starter": """# 🌋 MISIÓN AUTÓNOMA · CÓDIGO JEDI 5–4–2–1\n# ✦ Abre la run Mision_Mustafar y escribe aquí el tracking completo.\npass""",
     },
 ]
 

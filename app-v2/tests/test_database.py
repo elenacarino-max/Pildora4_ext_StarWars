@@ -28,12 +28,24 @@ class DatabaseTests(unittest.TestCase):
 
     def test_defense_rejects_same_run(self):
         session = database.create_session()
-        team = database.join_team(session["code"], "Orden de Dagobah")
+        team = database.join_team(session["code"], "Custodios de Dagobah")
         payload = {"selected_run":"Tatooine","evidence":"F1","artifact":"matriz",
                    "discarded_run":"Tatooine","discard_reason":"coste",
                    "limitation":"sesgo","recommendation":"revisar"}
         with self.assertRaises(ValueError):
             database.save_defense(team["id"], payload)
+
+    def test_session_keeps_six_questions_and_forced_advance_penalizes(self):
+        session = database.create_session()
+        self.assertEqual(len(session["question_ids"]), 6)
+        self.assertEqual(session["question_ids"], database.get_session(session["code"])["question_ids"])
+        team = database.join_team(session["code"], "Vigías de Endor")
+        for _ in range(5):
+            failures = database.record_attempt(team["id"], "question-test", "pass", False, "fallo")
+        self.assertEqual(failures, 5)
+        team = database.force_advance_chamber(team["id"], 0)
+        self.assertEqual(team["chamber_index"], 1)
+        self.assertEqual(team["score"], -10)
 
 
 if __name__ == "__main__":

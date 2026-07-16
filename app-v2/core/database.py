@@ -12,6 +12,7 @@ from pathlib import Path
 
 from .config import GAME_DB, MAX_TEAMS, SESSION_PREFIX, ensure_data_dirs
 from .holocrons import HOLOCRONS
+from .questions import TEAM_NAMES, choose_session_question_ids
 from .security import clean_team_name
 
 
@@ -43,7 +44,8 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS sessions (
                 id TEXT PRIMARY KEY, code TEXT UNIQUE NOT NULL,
                 created_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'open',
-                global_hint TEXT NOT NULL DEFAULT '', scoreboard_visible INTEGER NOT NULL DEFAULT 0
+                global_hint TEXT NOT NULL DEFAULT '', scoreboard_visible INTEGER NOT NULL DEFAULT 0,
+                question_ids_json TEXT NOT NULL DEFAULT '[]'
             );
             CREATE TABLE IF NOT EXISTS teams (
                 id TEXT PRIMARY KEY, session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
@@ -56,6 +58,12 @@ def init_db() -> None:
                 id INTEGER PRIMARY KEY AUTOINCREMENT, team_id TEXT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
                 challenge_id TEXT NOT NULL, submitted_code TEXT NOT NULL,
                 valid INTEGER NOT NULL, feedback TEXT NOT NULL, created_at TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS hint_usage (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                team_id TEXT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+                challenge_id TEXT NOT NULL, level INTEGER NOT NULL, used_at TEXT NOT NULL,
+                UNIQUE(team_id, challenge_id, level)
             );
             CREATE TABLE IF NOT EXISTS mission_runs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT, team_id TEXT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
@@ -71,21 +79,49 @@ def init_db() -> None:
             );
             """
         )
+        columns = {row[1] for row in db.execute("PRAGMA table_info(sessions)")}
+        if "question_ids_json" not in columns:
+            db.execute("ALTER TABLE sessions ADD COLUMN question_ids_json TEXT NOT NULL DEFAULT '[]'")
 
 
 def _row(row: sqlite3.Row | None) -> dict | None:
     return dict(row) if row else None
 
 
+def _session_row(row: sqlite3.Row | None) -> dict | None:
+    session = _row(row)
+    if not session:
+        return None
+    try:
+        question_ids = json.loads(session.get("question_ids_json") or "[]")
+    except json.JSONDecodeError:
+        question_ids = []
+    if len(question_ids) != 6:
+        question_ids = choose_session_question_ids()
+        with connect() as db:
+            db.execute(
+                "UPDATE sessions SET question_ids_json=? WHERE id=?",
+                (json.dumps(question_ids), session["id"]),
+            )
+    session["question_ids"] = question_ids
+    return session
+
+
 def create_session() -> dict:
     init_db()
     for _ in range(20):
         code = f"{SESSION_PREFIX}-{secrets.randbelow(9000) + 1000}"
-        session = {"id": str(uuid.uuid4()), "code": code, "created_at": _now()}
+        session = {
+            "id": str(uuid.uuid4()),
+            "code": code,
+            "created_at": _now(),
+            "question_ids_json": json.dumps(choose_session_question_ids()),
+        }
         try:
             with connect() as db:
                 db.execute(
-                    "INSERT INTO sessions(id, code, created_at) VALUES (:id, :code, :created_at)",
+                    """INSERT INTO sessions(id, code, created_at, question_ids_json)
+                       VALUES (:id, :code, :created_at, :question_ids_json)""",
                     session,
                 )
             return get_session(code) or session
@@ -96,12 +132,20 @@ def create_session() -> dict:
 
 def get_session(code: str) -> dict | None:
     with connect() as db:
-        return _row(db.execute("SELECT * FROM sessions WHERE code=?", (code.strip().upper(),)).fetchone())
+        row = db.execute("SELECT * FROM sessions WHERE code=?", (code.strip().upper(),)).fetchone()
+    return _session_row(row)
+
+
+def get_session_by_id(session_id: str) -> dict | None:
+    with connect() as db:
+        row = db.execute("SELECT * FROM sessions WHERE id=?", (session_id,)).fetchone()
+    return _session_row(row)
 
 
 def list_sessions() -> list[dict]:
     with connect() as db:
-        return [dict(row) for row in db.execute("SELECT * FROM sessions ORDER BY created_at DESC")]
+        rows = db.execute("SELECT * FROM sessions ORDER BY created_at DESC").fetchall()
+    return [_session_row(row) for row in rows]
 
 
 def set_session_status(session_id: str, status: str) -> None:
@@ -121,6 +165,8 @@ def join_team(session_code: str, team_name: str) -> dict:
     if not session or session["status"] != "open":
         raise ValueError("La sesión no existe o está cerrada.")
     name = clean_team_name(team_name)
+    if name not in TEAM_NAMES:
+        raise ValueError("Selecciona uno de los nombres de equipo disponibles.")
     with connect() as db:
         existing = db.execute(
             "SELECT * FROM teams WHERE session_id=? AND name=?", (session["id"], name)
@@ -156,20 +202,54 @@ def list_teams(session_id: str) -> list[dict]:
         return [dict(row) for row in db.execute(query, (session_id,))]
 
 
-def record_attempt(team_id: str, challenge_id: str, code: str, valid: bool, feedback: str) -> None:
+def record_attempt(team_id: str, challenge_id: str, code: str, valid: bool, feedback: str) -> int:
     with connect() as db:
         db.execute(
             "INSERT INTO attempts(team_id,challenge_id,submitted_code,valid,feedback,created_at) VALUES (?,?,?,?,?,?)",
             (team_id, challenge_id, code[:12000], int(valid), feedback[:1000], _now()),
         )
+        return db.execute(
+            "SELECT COUNT(*) FROM attempts WHERE team_id=? AND challenge_id=? AND valid=0",
+            (team_id, challenge_id),
+        ).fetchone()[0]
 
 
-def use_hint(team_id: str) -> None:
+def attempt_count(team_id: str, challenge_id: str, valid: bool | None = None) -> int:
+    query = "SELECT COUNT(*) FROM attempts WHERE team_id=? AND challenge_id=?"
+    values: list[object] = [team_id, challenge_id]
+    if valid is not None:
+        query += " AND valid=?"
+        values.append(int(valid))
     with connect() as db:
+        return db.execute(query, values).fetchone()[0]
+
+
+def hint_count(team_id: str, challenge_id: str) -> int:
+    with connect() as db:
+        return db.execute(
+            "SELECT COUNT(*) FROM hint_usage WHERE team_id=? AND challenge_id=?",
+            (team_id, challenge_id),
+        ).fetchone()[0]
+
+
+def use_hint(team_id: str, challenge_id: str) -> int:
+    with connect() as db:
+        level = db.execute(
+            "SELECT COUNT(*) FROM hint_usage WHERE team_id=? AND challenge_id=?",
+            (team_id, challenge_id),
+        ).fetchone()[0]
+        if level >= 3:
+            return level
+        level += 1
         db.execute(
-            "UPDATE teams SET hints_used=hints_used+1, score=MAX(0,score-5) WHERE id=?",
+            "INSERT OR IGNORE INTO hint_usage(team_id,challenge_id,level,used_at) VALUES (?,?,?,?)",
+            (team_id, challenge_id, level, _now()),
+        )
+        db.execute(
+            "UPDATE teams SET hints_used=hints_used+1, score=score-5 WHERE id=?",
             (team_id,),
         )
+        return level
 
 
 def complete_chamber(team_id: str, chamber_index: int) -> dict:
@@ -182,6 +262,22 @@ def complete_chamber(team_id: str, chamber_index: int) -> dict:
             phase = "missions" if next_index >= 6 else "chambers"
             db.execute(
                 "UPDATE teams SET chamber_index=?, phase=?, score=score+20 WHERE id=?",
+                (next_index, phase, team_id),
+            )
+    return get_team(team_id) or {}
+
+
+def force_advance_chamber(team_id: str, chamber_index: int) -> dict:
+    """Evita bloqueos tras cinco fallos y aplica la penalización acordada."""
+    with connect() as db:
+        team = db.execute("SELECT chamber_index FROM teams WHERE id=?", (team_id,)).fetchone()
+        if not team:
+            raise ValueError("Equipo no encontrado")
+        if team[0] == chamber_index:
+            next_index = chamber_index + 1
+            phase = "missions" if next_index >= 6 else "chambers"
+            db.execute(
+                "UPDATE teams SET chamber_index=?, phase=?, score=score-10 WHERE id=?",
                 (next_index, phase, team_id),
             )
     return get_team(team_id) or {}
@@ -267,6 +363,7 @@ def get_defense(team_id: str) -> dict | None:
 def reset_team(team_id: str) -> None:
     with connect() as db:
         db.execute("DELETE FROM attempts WHERE team_id=?", (team_id,))
+        db.execute("DELETE FROM hint_usage WHERE team_id=?", (team_id,))
         db.execute("DELETE FROM mission_runs WHERE team_id=?", (team_id,))
         db.execute("DELETE FROM defenses WHERE team_id=?", (team_id,))
         db.execute("UPDATE teams SET chamber_index=0,phase='chambers',score=0,hints_used=0,holocron_id=NULL WHERE id=?", (team_id,))

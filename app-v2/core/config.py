@@ -3,16 +3,23 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 
 APP_DIR = Path(__file__).resolve().parents[1]
-DATA_DIR = Path(os.getenv("MLFLOW_JEDI_DATA_DIR", APP_DIR / "data")).resolve()
+load_dotenv(APP_DIR / ".env")
+_configured_data_dir = Path(os.getenv("MLFLOW_JEDI_DATA_DIR", "data"))
+DATA_DIR = (
+    _configured_data_dir if _configured_data_dir.is_absolute()
+    else APP_DIR / _configured_data_dir
+).resolve()
 ARTIFACTS_DIR = DATA_DIR / "artifacts"
 GAME_DB = DATA_DIR / "game.db"
 MLFLOW_DB = DATA_DIR / "mlflow.db"
 
 TEACHER_PASSWORD = os.getenv("MLFLOW_JEDI_TEACHER_PASSWORD", "1234")
 SESSION_PREFIX = "JEDI"
-MAX_TEAMS = int(os.getenv("MLFLOW_JEDI_MAX_TEAMS", "7"))
+MAX_TEAMS = int(os.getenv("MLFLOW_JEDI_MAX_TEAMS", "10"))
 
 
 def ensure_data_dirs() -> None:
