@@ -28,6 +28,7 @@ Nueva aplicación práctica de la píldora extendida. Los documentos y notebooks
 ```bash
 docker compose up --build
 
+
 docker compose down #para detenerla
 ```
 
