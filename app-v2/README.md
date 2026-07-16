@@ -4,8 +4,10 @@ Nueva aplicación práctica de la píldora extendida. Los documentos y notebooks
 
 ## Qué incluye
 
-- acceso sin cuentas mediante código de sesión y nombre de equipo;
-- seis cámaras didácticas con validación AST y feedback conceptual;
+- acceso sin cuentas mediante código de sesión y diez nombres de equipo predefinidos;
+- banco de 50 preguntas; cada sesión selecciona seis, una por concepto;
+- seis cámaras didácticas con teoría, cinco intentos, pistas y validación AST;
+- editor Python con tabulación, contexto e indicaciones visuales;
 - tres misiones reales de Random Forest sobre Digits;
 - tracking real con MLflow: 5 parámetros, 4 métricas, 2 artefactos y 1 modelo;
 - comparador de runs y métricas por clase;
@@ -29,7 +31,7 @@ docker compose up --build
 docker compose down #para detenerla
 ```
 
-El volumen `mlflow_jedi_data` conserva sesiones, runs, modelos y artefactos aunque el contenedor se reinicie.
+El volumen `mlflow_jedi_data` conserva sesiones, intentos, puntuaciones, runs, modelos y artefactos aunque el contenedor se reinicie o se reconstruya. `docker compose down` no lo borra; `docker compose down -v` sí.
 
 ## Seguridad
 

@@ -4,13 +4,23 @@
 
 1. Arranca la aplicación y entra en **Profesorado**.
 2. Crea una sesión y comparte el código `JEDI-XXXX`.
-3. Organiza equipos de tres: Navegante, Escriba y Auditor.
-4. Comprueba que la carpeta `data/` está en almacenamiento persistente.
+3. Organiza equipos de tres: Navegante, Escriba y Auditor. Cada grupo elige uno de los diez nombres del desplegable.
+4. Crea una sesión nueva: la aplicación elegirá seis preguntas al azar, una de cada concepto esencial de MLflow.
+
+### Qué significa conservar `data/`
+
+No necesitas revisar ninguna carpeta durante la clase. La aplicación guarda automáticamente sesiones, puntuaciones, intentos, runs, modelos y artefactos.
+
+- **Con Docker:** `docker-compose.yml` ya conecta esos datos al volumen `mlflow_jedi_data`. El volumen vive fuera del contenedor, así que `docker compose down` o reconstruir la imagen no borra la actividad.
+- **Sin Docker:** los datos quedan en `app-v2/data/`. No elimines esa carpeta mientras necesites conservar sesiones anteriores.
+- `docker compose down -v` sí elimina expresamente el volumen. No uses `-v` salvo que quieras empezar desde cero.
 
 ## Durante la actividad
 
-- Las cámaras se abren en orden y cada solución válida suma 20 puntos.
+- Las seis cámaras se abren en orden y cada solución válida suma 20 puntos.
+- Cada sesión recibe una selección distinta procedente de un banco de 50 preguntas.
 - Cada pista resta 5 puntos y revela progresivamente concepto, categoría y sintaxis.
+- Hay cinco intentos por cámara. Tras cinco fallos se muestra la solución, se restan 10 puntos adicionales y el equipo avanza para evitar bloqueos.
 - Las misiones suman 30 puntos; completar las tres añade 15.
 - La defensa completa suma 25 puntos.
 - Desde el panel puedes desbloquear una cámara, reiniciar un equipo, enviar un aviso global o reasignar un holocrón.

@@ -13,9 +13,6 @@ from .security import safe_slug
 def execute_safe_mission(session_code: str, team_name: str, mission_id: str) -> dict:
     """Entrena una plantilla propia. Nunca ejecuta el texto enviado por el alumnado."""
     ensure_data_dirs()
-    # MLflow usa ./mlruns como raíz inicial al abrir un backend SQL. Situamos
-    # ese directorio dentro del volumen persistente antes de crear el cliente.
-    os.chdir(DATA_DIR)
     mpl_config = DATA_DIR / ".matplotlib"
     mpl_config.mkdir(parents=True, exist_ok=True)
     os.environ.setdefault("MPLCONFIGDIR", str(mpl_config))

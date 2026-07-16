@@ -8,3 +8,4 @@ data/*.db
 data/*.db-*
 data/artifacts/**
 !data/artifacts/.gitkeep
+data/.matplotlib/
