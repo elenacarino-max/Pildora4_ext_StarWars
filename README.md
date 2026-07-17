@@ -1,63 +1,100 @@
 # Píldora extendida de MLflow · Biblioteca Jedi
 
-Material docente para explicar MLflow con el dataset Digits y una narrativa
-inspirada en Star Wars.
+Material docente para aprender **tracking de experimentos con MLflow** a partir
+del dataset Digits de scikit-learn y una narrativa inspirada en Star Wars.
 
-## Nueva aplicación interactiva
+El repositorio combina una aplicación interactiva para el aula con documentos
+y notebooks que sirven como apoyo, práctica y plan de contingencia.
 
-La nueva versión completa está en `app-v2/`. Es una aplicación Streamlit con
-sesiones, seis cámaras, validación segura de código, entrenamiento real,
-tracking con MLflow, comparador de runs, holocrones, defensas y panel docente.
+## Aplicación interactiva
 
-Los documentos y notebooks descritos a continuación se conservan como plan de
-contingencia, práctica posterior y material de referencia. El despliegue de la
-nueva aplicación se decidirá después de validar su funcionamiento local.
+La versión principal está en [`app-v2/`](app-v2/). Es una aplicación Streamlit
+en la que el alumnado:
 
-## Versiones vigentes
+1. supera seis cámaras sobre Experiment, Run, Parameters, Metrics, Artifacts y
+   Model;
+2. reconstruye tres experimentos reales de Random Forest;
+3. compara métricas y artefactos registrados con MLflow;
+4. defiende una recomendación basada en evidencias.
 
-### Documentos para el alumnado
+El profesorado dispone de un panel para crear sesiones, seguir el progreso,
+enviar avisos, desbloquear cámaras, reasignar retos y exportar resultados.
 
-- `docs/alumnado/Misiones_ALUMNADO_DIGITS.docx`: fichas de misiones y
-  holocrones para la actividad.
+### Inicio rápido con Docker
 
-### Documentos para el profesorado
+```powershell
+cd app-v2
+Copy-Item .env.example .env
+docker compose up --build
+```
 
-- `docs/profesorado/Guion_PROFESORAS_DIGITS.docx`: guía resumida para preparar
-  e impartir la sesión.
-- `docs/profesorado/Misiones_PROFESORADO_DIGITS.docx`: guía de corrección de
-  las misiones.
+Abre <http://localhost:8501>. Antes de usar la aplicación, cambia en `.env` la
+contraseña de `MLFLOW_JEDI_TEACHER_PASSWORD`.
 
-### Documentos de referencia
+Para detenerla sin perder los datos:
 
-- `docs/referencia/Resumen_Manual_MLflow.docx`: resumen teórico de apoyo.
-- Los PDF de `docs/referencia/` se conservan como fuentes de consulta y no se
-  han modificado en esta reorganización.
+```powershell
+docker compose down
+```
 
-### Notebooks de live coding
+La guía completa de instalación, uso y pruebas está en el
+[`README de app-v2`](app-v2/README.md).
 
-- `notebooks/01_live_coding/Live_Coding_COMPLETO.ipynb`: versión completa para
-  consulta.
-- `notebooks/01_live_coding/Live_Coding_DEMO_SEGURA.ipynb`: versión recomendada
-  para exponer.
-- `notebooks/01_live_coding/Live_Coding_PARA_RELLENAR.ipynb`: versión con
-  huecos para practicar.
+## Material docente
 
-### Notebooks de práctica
+### Para el alumnado
 
-- `notebooks/02_practica/01_Tracking_Ejercicios.ipynb`: ejercicios iniciales.
-- `notebooks/02_practica/02_Archivos_Jedi_SOLUCION.ipynb`: solución completa.
-- `notebooks/02_practica/03_Orden_66_RETO.ipynb`: reto para el alumnado.
+- [`Misiones_ALUMNADO_DIGITS.docx`](docs/alumnado/Misiones_ALUMNADO_DIGITS.docx):
+  fichas de misiones y holocrones.
 
-## Criterio de versionado aplicado
+### Para el profesorado
 
-Los archivos que estaban en `docs_corregidos/` no formaban un conjunto
-coherente. Las versiones corregidas de los dos guiones describían parámetros,
-resultados y un live coding distintos de los notebooks vigentes. Por ello se
-han conservado como definitivos los guiones que sí coinciden con los notebooks.
+- [`Guion_PROFESORAS_DIGITS.docx`](docs/profesorado/Guion_PROFESORAS_DIGITS.docx):
+  guía para preparar e impartir la sesión.
+- [`Misiones_PROFESORADO_DIGITS.docx`](docs/profesorado/Misiones_PROFESORADO_DIGITS.docx):
+  guía de corrección de las misiones.
+- [`Guía rápida de la aplicación`](app-v2/docs/GUIA_PROFESORADO.md): dinámica,
+  puntuación y actuación durante la actividad.
+- [`Guía de mantenimiento`](app-v2/docs/GUIA_MANTENIMIENTO.md): persistencia,
+  copias de seguridad y actualizaciones.
 
-La versión corregida de `Misiones_ALUMNADO` era idéntica al documento existente
-y se ha eliminado como duplicado. La guía `Misiones_PROFESORADO` sí era un
-documento adicional necesario y se ha incorporado a `docs/profesorado/` con un
-nombre definitivo.
+### Referencia
 
-Las imágenes de `assets/` no se han modificado.
+- [`Resumen_Manual_MLflow.docx`](docs/referencia/Resumen_Manual_MLflow.docx):
+  resumen teórico.
+- [`Guia_estructura_pildora_extendida.pdf`](docs/referencia/Guia_estructura_pildora_extendida.pdf)
+  y [`MLflow_Jedi_Library.pdf`](docs/referencia/MLflow_Jedi_Library.pdf): fuentes
+  de consulta.
+
+## Notebooks
+
+### Live coding
+
+- [`Live_Coding_COMPLETO.ipynb`](notebooks/01_live_coding/Live_Coding_COMPLETO.ipynb):
+  versión completa de consulta.
+- [`Live_Coding_DEMO_SEGURA.ipynb`](notebooks/01_live_coding/Live_Coding_DEMO_SEGURA.ipynb):
+  versión recomendada para la exposición.
+- [`Live_Coding_PARA_RELLENAR.ipynb`](notebooks/01_live_coding/Live_Coding_PARA_RELLENAR.ipynb):
+  versión con huecos para practicar.
+
+### Práctica
+
+- [`01_Tracking_Ejercicios.ipynb`](notebooks/02_practica/01_Tracking_Ejercicios.ipynb):
+  ejercicios iniciales.
+- [`02_Archivos_Jedi_SOLUCION.ipynb`](notebooks/02_practica/02_Archivos_Jedi_SOLUCION.ipynb):
+  solución completa.
+- [`03_Orden_66_RETO.ipynb`](notebooks/02_practica/03_Orden_66_RETO.ipynb):
+  reto final para el alumnado.
+
+## Estructura
+
+```text
+.
+├── app-v2/       # aplicación Streamlit, pruebas y documentación operativa
+├── assets/       # imágenes de apoyo para el material docente
+├── docs/         # documentos para alumnado, profesorado y referencia
+└── notebooks/    # live coding y prácticas
+```
+
+Los documentos y notebooks de la raíz se mantienen como material complementario
+y como alternativa si no es posible utilizar la aplicación durante la sesión.
