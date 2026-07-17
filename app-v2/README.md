@@ -4,6 +4,16 @@ Aplicación didáctica de Streamlit para practicar el ciclo completo de tracking
 de experimentos: parámetros, métricas, artefactos y modelos registrados con
 MLflow sobre el dataset Digits.
 
+## Aplicación publicada
+
+**[Abrir MLflow Jedi en Streamlit](https://pildora4extstarwars-14.streamlit.app/)**
+
+El despliegue público permite probar y compartir la actividad sin instalar el
+proyecto. El profesorado debe crear primero una sesión y compartir el código
+`JEDI-XXXX` con los equipos. La ejecución local y Docker, descritas más abajo,
+continúan disponibles para pruebas y para instalaciones con almacenamiento
+persistente propio.
+
 ## Funcionalidad
 
 ### Experiencia del alumnado

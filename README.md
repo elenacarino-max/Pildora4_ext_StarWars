@@ -20,6 +20,15 @@ en la que el alumnado:
 El profesorado dispone de un panel para crear sesiones, seguir el progreso,
 enviar avisos, desbloquear cámaras, reasignar retos y exportar resultados.
 
+### Aplicación publicada
+
+La versión desplegada está disponible en:
+
+**[Abrir MLflow Jedi en Streamlit](https://pildora4extstarwars-14.streamlit.app/)**
+
+Para una sesión de aula, el profesorado debe entrar primero, crear una sesión y
+compartir con los equipos el código `JEDI-XXXX` generado por la aplicación.
+
 ### Inicio rápido con Docker
 
 ```powershell
