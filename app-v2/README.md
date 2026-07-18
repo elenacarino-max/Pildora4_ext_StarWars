@@ -142,4 +142,4 @@ Si la aplicación o la conectividad fallan, utiliza los notebooks y documentos
 de las carpetas [`notebooks/`](../notebooks/) y [`docs/`](../docs/) de la raíz
 del repositorio.
 
-añado memoria tecnica de la app a la carpeta app/docs/
+
