@@ -6,6 +6,11 @@ del dataset Digits de scikit-learn y una narrativa inspirada en Star Wars.
 El repositorio combina una aplicación interactiva para el aula con documentos
 y notebooks que sirven como apoyo, práctica y plan de contingencia.
 
+
+## Vista de la aplicación 
+
+<img width="2112" height="1312" alt="Captura de pantalla 2026-07-18 234440" src="https://github.com/user-attachments/assets/7adeb763-1089-43f2-8d6e-18e6ab2195ed" />
+
 ## Aplicación interactiva
 
 La versión principal está en [`app-v2/`](app-v2/). Es una aplicación Streamlit
