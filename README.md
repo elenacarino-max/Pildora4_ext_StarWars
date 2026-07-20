@@ -6,6 +6,13 @@ del dataset Digits de scikit-learn y una narrativa inspirada en Star Wars.
 El repositorio combina una aplicación interactiva para el aula con documentos
 y notebooks que sirven como apoyo, práctica y plan de contingencia.
 
+
+## 📚 Documentación del proyecto
+
+Consulta la documentación completa y los diagramas del proyecto en:
+
+👉 [Documentación en DeepWiki](https://deepwiki.com/elenacarino-max/Pildora4_ext_StarWars)
+
 ## Aplicación interactiva
 
 La versión principal está en [`app-v2/`](app-v2/). Es una aplicación Streamlit
