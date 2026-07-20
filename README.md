@@ -7,9 +7,11 @@ El repositorio combina una aplicación interactiva para el aula con documentos
 y notebooks que sirven como apoyo, práctica y plan de contingencia.
 
 
-## Vista de la aplicación 
+## 📚 Documentación del proyecto
 
-<img width="2112" height="1312" alt="Captura de pantalla 2026-07-18 234440" src="https://github.com/user-attachments/assets/7adeb763-1089-43f2-8d6e-18e6ab2195ed" />
+Consulta la documentación completa y los diagramas del proyecto en:
+
+👉 [Documentación en DeepWiki](https://deepwiki.com/elenacarino-max/Pildora4_ext_StarWars)
 
 ## Aplicación interactiva
 
