@@ -33,8 +33,8 @@ La versión desplegada está disponible en:
 
 **[Abrir MLflow Jedi en Streamlit](https://pildora4extstarwars-14.streamlit.app/)**
 
-Para una sesión de aula, el profesorado debe entrar primero, crear una sesión y
-compartir con los equipos el código `JEDI-XXXX` generado por la aplicación.
+Para crear una sesion hay que entrar como profesor con esta contraseña Jedi!KEoErJmGO7Ge-2026,
+automaticamente nos da el código `JEDI-XXXX` generado por la aplicación, y con ese codigo se accede a el juego
 
 ### Inicio rápido con Docker
 
