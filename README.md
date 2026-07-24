@@ -11,7 +11,7 @@ y notebooks que sirven como apoyo, práctica y plan de contingencia.
 
 Consulta la documentación completa y los diagramas del proyecto en:
 
-👉 [Documentación en DeepWiki](https://deepwiki.com/elenacarino-max/Pildora4_ext_StarWars)
+👉 [Documentación en DeepWiki]https://mintlify.wiki/elenacarino-max/Pildora4_ext_StarWars/introduction
 
 ## Aplicación interactiva
 
